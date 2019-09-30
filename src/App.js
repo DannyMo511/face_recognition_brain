@@ -28,7 +28,7 @@ class App extends Component {
 		this.state = {
 			input: "",
 			imageURL: "",
-			box: {}
+			boxes: []
 		}
 	}
 
@@ -38,11 +38,28 @@ class App extends Component {
 
 	calculateFaceLocation = (data) =>{
 		const regions_obj_arr = data.outputs[0].data.regions;
-		// const bounding_boxes_arr = regions_obj_arr.map((obj) =>{
-		//     	return (obj.region_info.bounding_box);
-		// 	})
-		const clarifai_face = regions_obj_arr[0].region_info.bounding_box;
-		console.log(clarifai_face);
+
+		if (!regions_obj_arr) return [];
+
+		const input_image = document.getElementById('input_image');
+		const width = Number(input_image.width);
+		const height = Number(input_image.height);
+
+		const bounding_boxes_arr = regions_obj_arr.map((obj) =>{
+				const clarifai_face = obj.region_info.bounding_box;
+
+				return {
+					left_col: clarifai_face.left_col * width,
+					top_row: clarifai_face.top_row * height,
+					right_col: width - (clarifai_face.right_col * width),
+					bottom_row: height - (clarifai_face.bottom_row * height)
+				}
+			})
+		return bounding_boxes_arr;
+	}
+
+	displayFaceBoxes = (boxes) =>{
+		this.setState({boxes: boxes});
 	}
 
 	onButtonSubmit = (event)=>{
@@ -53,11 +70,12 @@ class App extends Component {
 		    // URL
 		    this.state.input
 		)
-		.then(response => this.calculateFaceLocation(response))
+		.then(response => this.displayFaceBoxes(this.calculateFaceLocation(response)))
 		.catch(err => console.log(err));
 	}
 
 	render(){
+		console.log(this.state);
 		return (
     		<div className="App">
 	    	<Particles className="particles"
@@ -68,7 +86,7 @@ class App extends Component {
       		<ImageLinkForm 
       			onInputChange={this.onInputChange}
       			onButtonSubmit={this.onButtonSubmit}/>
-			<FaceRecognition imageURL={this.state.imageURL}/>
+			<FaceRecognition imageURL={this.state.imageURL} boxes={this.state.boxes}/>
 		    </div>
 		  );
 	}
