@@ -11,6 +11,8 @@ import FaceRecognition from './Components/FaceRecognition/FaceRecognition';
 import './App.css';
 
 
+const serverAddress = 'http://localhost:3000/';
+
 const app = new Clarifai.App({
  apiKey: '806659a2aff24347a97e11059f3af0f9'
 });
@@ -32,8 +34,28 @@ class App extends Component {
 			imageURL: "",
 			boxes: [],
 			route: 'signin',
-			isSingedIn: false
+			isSingedIn: false,
+			user: {
+				id: '',
+				name: '',
+				email: '',
+				entries: 0,
+				joined: ''
+			}
 		}
+	}
+
+
+	loadUser = (data) =>{
+		this.setState({
+			user: {
+				id: data.id,
+				name: data.name,
+				email: data.email,
+				entries: data.entries,
+				joined: data.joined
+			}
+		})
 	}
 
 	onInputChange = (event) =>{
@@ -89,7 +111,6 @@ class App extends Component {
 	}
 
 	render(){
-		console.log(this.state);
 		const {imageURL, boxes, route, isSingedIn} = this.state;
 		return (
     		<div className="App">
@@ -101,7 +122,8 @@ class App extends Component {
 		      	{ route === 'home'
 		      		? <div>
 		      			<Logo />
-			      		<Rank />
+			      		<Rank name={this.state.user.name}
+			      			  entries={this.state.user.entries}/>
 			      		<ImageLinkForm 
 			      			onInputChange={this.onInputChange}
 			      			onButtonSubmit={this.onButtonSubmit}/>
@@ -109,8 +131,13 @@ class App extends Component {
 		      		  </div>
 		      		: (
 		      			route === 'signin'
-		      				? <Signin onRouteChange={this.onRouteChange}/>
-		      				: <Register onRouteChange={this.onRouteChange}/>
+		      				? <Signin loadUser={this.loadUser}
+		      						  onRouteChange={this.onRouteChange} 
+		      						  serverAddress={serverAddress}/>
+
+		      				: <Register loadUser={this.loadUser}
+		      							onRouteChange={this.onRouteChange} 
+		      							serverAddress={serverAddress}/>
 	      			   )
 		      	}
 		    </div>
