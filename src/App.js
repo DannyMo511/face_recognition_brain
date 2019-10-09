@@ -96,7 +96,21 @@ class App extends Component {
 		    // URL
 		    this.state.input
 		)
-		.then(response => this.displayFaceBoxes(this.calculateFaceLocation(response)))
+		.then(response => {
+			if(response){
+				fetch(serverAddress + 'image', {
+					method: 'put',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({
+						id: this.state.user.id
+				})})
+					.then(response => response.json())
+					.then(count => {
+						this.setState(Object.assign(this.state.user, {entries: count}))
+					});
+			}
+			this.displayFaceBoxes(this.calculateFaceLocation(response))
+		})
 		.catch(err => console.log(err));
 	}
 
@@ -112,6 +126,7 @@ class App extends Component {
 
 	render(){
 		const {imageURL, boxes, route, isSingedIn} = this.state;
+		console.log(this.state);
 		return (
     		<div className="App">
 		    	<Particles className="particles"
