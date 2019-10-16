@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {validate_register_fields} from '../../validation';
 
 class Register extends Component{
 	constructor(props){
@@ -23,18 +24,23 @@ class Register extends Component{
 	}
 
 	onSubmitRegister = () =>{
+		const {register_name, register_email, register_password} = this.state;
+		if(!validate_register_fields(register_name, register_email, register_password)){
+			return;
+		}
+
 		fetch(this.props.serverAddress + 'register', {
 			method: 'post',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
-				email: this.state.register_email,
-				password: this.state.register_password,
-				name: this.state.register_name
+				email: register_email,
+				password: register_password,
+				name: register_name
 			})
 		})
 			.then(response => response.json())
 			.then(user => {
-				if (user){
+				if (user.email){
 					this.props.loadUser(user);
 					this.props.onRouteChange('home');
 				}

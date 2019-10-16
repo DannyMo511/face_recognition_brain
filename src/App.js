@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import Clarifai from 'clarifai';
 import Particles from 'react-particles-js';
 import Navigation from './Components/Navigation/Navigation';
 import Signin from './Components/Signin/Signin';
@@ -13,10 +12,6 @@ import './App.css';
 
 const serverAddress = 'http://localhost:3000/';
 
-const app = new Clarifai.App({
- apiKey: '806659a2aff24347a97e11059f3af0f9'
-});
-
 
 const particlesOptions = {
 	particles: {
@@ -26,10 +21,7 @@ const particlesOptions = {
 	}
 }
 
-class App extends Component {
-	constructor(){
-		super();
-		this.state = {
+const initial_state = {
 			input: "",
 			imageURL: "",
 			boxes: [],
@@ -42,7 +34,12 @@ class App extends Component {
 				entries: 0,
 				joined: ''
 			}
-		}
+		};
+
+class App extends Component {
+	constructor(){
+		super();
+		this.state = initial_state;
 	}
 
 
@@ -90,12 +87,14 @@ class App extends Component {
 
 	onButtonSubmit = (event)=>{
 		this.setState({imageURL: this.state.input});
-		app.models
-		.predict(
-		Clarifai.FACE_DETECT_MODEL,
-		    // URL
-		    this.state.input
-		)
+		
+		fetch(serverAddress + 'imageurl', {
+					method: 'post',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({
+						input: this.state.input
+				})})
+		.then(response => response.json())
 		.then(response => {
 			if(response){
 				fetch(serverAddress + 'image', {
@@ -107,7 +106,8 @@ class App extends Component {
 					.then(response => response.json())
 					.then(count => {
 						this.setState(Object.assign(this.state.user, {entries: count}))
-					});
+					})
+					.catch(console.log);
 			}
 			this.displayFaceBoxes(this.calculateFaceLocation(response))
 		})
@@ -116,7 +116,7 @@ class App extends Component {
 
 	onRouteChange = (route) =>{
 		if (route === 'signout'){
-			this.setState({isSingedIn: false});
+			this.setState(initial_state);
 		} else if (route === 'home'){
 			this.setState({isSingedIn: true});
 		}
@@ -126,7 +126,6 @@ class App extends Component {
 
 	render(){
 		const {imageURL, boxes, route, isSingedIn} = this.state;
-		console.log(this.state);
 		return (
     		<div className="App">
 		    	<Particles className="particles"

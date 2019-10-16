@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {validate_signin_fields} from '../../validation';
 
 class Signin extends Component{
 
@@ -19,12 +20,17 @@ class Signin extends Component{
 	}
 
 	onSubmitSignin = () =>{
+		const {signin_email, signin_password} = this.state;
+		if(!validate_signin_fields(signin_email, signin_password)){
+			return;
+		}
+
 		fetch(this.props.serverAddress + 'signin', {
 			method: 'post',
 			headers: {'Content-Type': 'application/json'},
 			body: JSON.stringify({
-				email: this.state.signin_email,
-				password: this.state.signin_password
+				email: signin_email,
+				password: signin_password
 			})
 		})
 			.then(response => response.json())
