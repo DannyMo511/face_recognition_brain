@@ -10,7 +10,7 @@ import FaceRecognition from './Components/FaceRecognition/FaceRecognition';
 import './App.css';
 
 
-const serverAddress = 'http://localhost:3000/';
+const serverAddress = 'https://intense-mountain-31190.herokuapp.com/';
 
 
 const particlesOptions = {
